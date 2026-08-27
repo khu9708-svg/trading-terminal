@@ -47,7 +47,10 @@ export function StatusBar() {
     <div className="flex h-6 shrink-0 items-center justify-between px-3 text-[10px] text-muted-foreground">
       <div className="flex items-center gap-3">
         <span className="flex select-none items-center gap-1.5 tracking-[0.22em] text-[10px] font-medium text-foreground/70">
-          <KayMark style={{ height: 12, width: 'auto', opacity: 0.9 }} sweep={false} />
+          <KayMark
+            style={{ height: 12, width: 'auto', opacity: 0.9 }}
+            sweep={false}
+          />
           KAY v1.0.0
         </span>
         {items.left.map((r) => (

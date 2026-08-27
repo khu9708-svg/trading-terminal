@@ -3,7 +3,11 @@
 import { emailOTPClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/react'
 import { useSyncExternalStore } from 'react'
-import { getAccessSession, __resetAccessSessionCache, type AccessSessionData } from './access-session'
+import {
+  getAccessSession,
+  __resetAccessSessionCache,
+  type AccessSessionData,
+} from './access-session'
 
 /** True when an App Server URL is explicitly configured. */
 export const hasAppServer = Boolean(import.meta.env.VITE_APP_SERVER_URL)
@@ -54,7 +58,6 @@ export const APP_SERVER_CREDENTIALS: RequestCredentials = 'same-origin'
 
 const AUTH_TOKEN_KEY = 'pairlens:auth-token'
 
-
 export function clearStoredAuthToken(): void {
   if (typeof window === 'undefined') return
   window.localStorage.removeItem(AUTH_TOKEN_KEY)
@@ -79,7 +82,9 @@ function createStubAuthClient() {
   >
 }
 
-const appServerUrl = (import.meta.env.VITE_APP_SERVER_URL ?? 'http://localhost:4046').replace(/\/+$/, '')
+const appServerUrl = (
+  import.meta.env.VITE_APP_SERVER_URL ?? 'http://localhost:4046'
+).replace(/\/+$/, '')
 
 function createAccessAuthClient() {
   let snapshot: AccessSessionData = { data: null, error: null }
@@ -100,7 +105,10 @@ function createAccessAuthClient() {
     useSession: () => {
       ensureStarted()
       const data = useSyncExternalStore(
-        (cb) => { listeners.add(cb); return () => listeners.delete(cb) },
+        (cb) => {
+          listeners.add(cb)
+          return () => listeners.delete(cb)
+        },
         () => snapshot,
         () => ({ data: null, error: null }) as AccessSessionData,
       )
@@ -113,12 +121,17 @@ function createAccessAuthClient() {
     signOut: async () => {
       __resetAccessSessionCache()
       clearStoredAuthToken()
-      if (typeof window !== 'undefined') window.location.href = '/cdn-cgi/access/logout'
+      if (typeof window !== 'undefined')
+        window.location.href = '/cdn-cgi/access/logout'
       return { data: null, error: null }
     },
     signIn: { emailOtp: () => Promise.resolve({ data: null, error: null }) },
-    emailOtp: { sendVerificationOtp: () => Promise.resolve({ data: null, error: null }) },
-  } as unknown as ReturnType<typeof createAuthClient<{ plugins: [ReturnType<typeof emailOTPClient>] }>>
+    emailOtp: {
+      sendVerificationOtp: () => Promise.resolve({ data: null, error: null }),
+    },
+  } as unknown as ReturnType<
+    typeof createAuthClient<{ plugins: [ReturnType<typeof emailOTPClient>] }>
+  >
 }
 
 export const authClient: ReturnType<

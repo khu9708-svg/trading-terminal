@@ -327,10 +327,14 @@ function slotNameToKey(name: string): string | null {
   if (name === 'custom-workspaces') return 'custom-workspaces'
   if (name === 'terminal-layout') return 'terminal.layout'
   if (name === 'discovery-layout') return 'discovery.layout'
-  if (name.startsWith('terminal-layout-')) return `terminal.layout.${name.slice('terminal-layout-'.length)}`
-  if (name.startsWith('discovery-layout-')) return `discovery.layout.${name.slice('discovery-layout-'.length)}`
-  if (name.startsWith('vars-')) return `workspace-vars:${name.slice('vars-'.length)}`
-  if (name.endsWith('-layout')) return `workspace.${name.slice(0, -'-layout'.length)}.layout`
+  if (name.startsWith('terminal-layout-'))
+    return `terminal.layout.${name.slice('terminal-layout-'.length)}`
+  if (name.startsWith('discovery-layout-'))
+    return `discovery.layout.${name.slice('discovery-layout-'.length)}`
+  if (name.startsWith('vars-'))
+    return `workspace-vars:${name.slice('vars-'.length)}`
+  if (name.endsWith('-layout'))
+    return `workspace.${name.slice(0, -'-layout'.length)}.layout`
   return null
 }
 
@@ -763,11 +767,16 @@ export class SyncCoordinator {
     try {
       const res = await this.fetch('/api/user/workspace', { method: 'GET' })
       if (!res.ok) return
-      const data = (await res.json()) as { slots?: Array<{ name: string; panels: unknown; updatedAt: number }> }
+      const data = (await res.json()) as {
+        slots?: Array<{ name: string; panels: unknown; updatedAt: number }>
+      }
       for (const slot of data.slots ?? []) {
         const key = slotNameToKey(slot.name)
         if (!key) continue
-        const localTs = parseInt(localStorage.getItem(`${TS_PREFIX}${key}`) ?? '0', 10)
+        const localTs = parseInt(
+          localStorage.getItem(`${TS_PREFIX}${key}`) ?? '0',
+          10,
+        )
         if (slot.updatedAt > localTs) {
           try {
             localStorage.setItem(`pairlens:${key}`, JSON.stringify(slot.panels))
@@ -784,12 +793,19 @@ export class SyncCoordinator {
   private async pullChartState(): Promise<void> {
     if (!this.enabledDomains.has('charts')) return
     try {
-      const res = await this.fetch('/api/user/chart-state?pairKey=_all', { method: 'GET' })
+      const res = await this.fetch('/api/user/chart-state?pairKey=_all', {
+        method: 'GET',
+      })
       if (!res.ok) return
       const data = (await res.json()) as {
-        indicators?: Record<string, unknown>; drawings?: Record<string, unknown>; updatedAt: number
+        indicators?: Record<string, unknown>
+        drawings?: Record<string, unknown>
+        updatedAt: number
       }
-      const localTs = parseInt(localStorage.getItem(`${TS_PREFIX}terminal.indicators`) ?? '0', 10)
+      const localTs = parseInt(
+        localStorage.getItem(`${TS_PREFIX}terminal.indicators`) ?? '0',
+        10,
+      )
       if (data.updatedAt > localTs) {
         for (const [key, value] of [
           ['terminal.indicators', data.indicators ?? {}],

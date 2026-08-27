@@ -31,24 +31,34 @@ export function __resetAccessSessionCache(): void {
   inflight = null
 }
 
-export async function getAccessSession(appServerUrl: string): Promise<AccessSessionData> {
+export async function getAccessSession(
+  appServerUrl: string,
+): Promise<AccessSessionData> {
   if (cache && Date.now() - cache.at < TTL_MS) return cache.value
   if (inflight) return inflight
 
   inflight = (async () => {
     try {
-      const res = await fetch(`${appServerUrl.replace(/\/+$/, '')}/api/auth/get-session`, {
-        credentials: 'same-origin',
-        headers: { accept: 'application/json' },
-      })
+      const res = await fetch(
+        `${appServerUrl.replace(/\/+$/, '')}/api/auth/get-session`,
+        {
+          credentials: 'same-origin',
+          headers: { accept: 'application/json' },
+        },
+      )
       if (!res.ok) {
-        const value: AccessSessionData = { data: null, error: { message: `HTTP ${res.status}` } }
+        const value: AccessSessionData = {
+          data: null,
+          error: { message: `HTTP ${res.status}` },
+        }
         cache = { at: Date.now(), value }
         return value
       }
       const value = (await res.json()) as AccessSessionData
       if (value.data?.session?.token) {
-        try { localStorage.setItem(AUTH_TOKEN_KEY, value.data.session.token) } catch {}
+        try {
+          localStorage.setItem(AUTH_TOKEN_KEY, value.data.session.token)
+        } catch {}
       }
       cache = { at: Date.now(), value }
       return value
