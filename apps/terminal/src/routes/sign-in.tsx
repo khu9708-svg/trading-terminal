@@ -2,7 +2,7 @@
 // SPDX-License-Identifier: FSL-1.1-Apache-2.0
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { createFileRoute, redirect, useNavigate } from '@tanstack/react-router'
 import { AnimatePresence, motion, useReducedMotion } from 'motion/react'
 
 import { BlocksIcon } from '@pairlens/ui/components/ui/blocks'
@@ -14,8 +14,21 @@ import { SignInExperience } from '@/components/sign-in-experience'
 import { SignInStatueScene } from '@/components/sign-in-statue'
 import { useOptimisticSession } from '@/lib/session'
 import { useSignInFlow } from '@/hooks/use-sign-in-flow'
+import { IS_KAY_BUILD } from '@/lib/kay-auth'
 
-export const Route = createFileRoute('/sign-in')({ component: SignInPage })
+export const Route = createFileRoute('/sign-in')({
+  // The KAY build has no Pairlens sign-in page. A direct hit on /sign-in
+  // starts the Cloudflare Access handshake; the terminal is otherwise public.
+  beforeLoad: () => {
+    if (IS_KAY_BUILD) {
+      if (typeof window !== 'undefined') {
+        window.location.href = '/api/auth/login'
+      }
+      throw redirect({ to: '/' })
+    }
+  },
+  component: SignInPage,
+})
 
 // Success splash beat — long enough to land, short enough to not annoy.
 const SPLASH_MS = 1900

@@ -19,6 +19,7 @@ import {
 import { SignInStatueScene } from '@/components/sign-in-statue'
 import { useOptimisticSession } from '@/lib/session'
 import { useSignInFlow } from '@/hooks/use-sign-in-flow'
+import { IS_KAY_BUILD, startKaySignIn } from '@/lib/kay-auth'
 
 // Success splash beat before the dialog closes — a touch quicker than the
 // full page's since the user is mid-task.
@@ -73,6 +74,12 @@ export function SignInDialog({ children }: SignInDialogProps) {
     : flow.otpSentTo
       ? 'otp'
       : 'email'
+
+  // KAY build: the trigger starts the Cloudflare Access handshake directly —
+  // there is no Pairlens email/OTP dialog.
+  if (IS_KAY_BUILD) {
+    return <span onClick={startKaySignIn}>{children}</span>
+  }
 
   return (
     <>

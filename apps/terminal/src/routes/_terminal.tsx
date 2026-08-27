@@ -117,6 +117,7 @@ import { usePersistedState } from '@/hooks/use-persisted-state'
 import { useRecentPairs } from '@/lib/recent-tickers'
 import { chartLinkProps } from '@/lib/market-ref/link'
 import { authClient, hasAppServer } from '@/lib/auth-client'
+import { IS_KAY_BUILD, startKaySignIn } from '@/lib/kay-auth'
 import { api, clearSessionCache, queryKeys, resolveUrl } from '@/lib/api'
 import { PairlensProvider } from '@/lib/pairlens-provider'
 import { MarketDataProvider } from '@/lib/market-data-provider'
@@ -1060,7 +1061,11 @@ function TerminalUserMenu({
                     {hasAppServer && (
                       <>
                         <DropdownMenuItem
-                          onClick={() => void navigate({ to: '/sign-in' })}
+                          onClick={() =>
+                            IS_KAY_BUILD
+                              ? startKaySignIn()
+                              : void navigate({ to: '/sign-in' })
+                          }
                           className="group mt-0.5 cursor-pointer justify-center gap-2 rounded-lg bg-primary py-2 text-[13px] font-semibold text-primary-foreground shadow-sm transition-[background-color,transform] duration-150 hover:bg-primary/90 focus:bg-primary/90 focus:text-primary-foreground not-data-[variant=destructive]:focus:**:text-primary-foreground active:scale-[.99]"
                         >
                           <LogIn />

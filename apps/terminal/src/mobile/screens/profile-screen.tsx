@@ -441,7 +441,7 @@ function SignedOutProfile() {
         <div className="px-4 pt-5">
           <a
             className="flex h-11 items-center justify-center gap-2 rounded-xl bg-primary px-5 text-[15px] font-semibold text-primary-foreground"
-            href="/sign-in"
+            href="/api/auth/login"
           >
             <LogIn className="size-4" />
             {t('settings.profile.signInButton')}

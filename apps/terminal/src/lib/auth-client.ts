@@ -121,8 +121,9 @@ function createAccessAuthClient() {
     signOut: async () => {
       __resetAccessSessionCache()
       clearStoredAuthToken()
+      // The KAY App Server clears the Access session and redirects home.
       if (typeof window !== 'undefined')
-        window.location.href = '/cdn-cgi/access/logout'
+        window.location.href = '/api/auth/logout'
       return { data: null, error: null }
     },
     signIn: { emailOtp: () => Promise.resolve({ data: null, error: null }) },
