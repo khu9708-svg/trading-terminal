@@ -323,6 +323,17 @@ function writeAssistantMerge(merged: Array<SyncedItem>): void {
   }
 }
 
+function slotNameToKey(name: string): string | null {
+  if (name === 'custom-workspaces') return 'custom-workspaces'
+  if (name === 'terminal-layout') return 'terminal.layout'
+  if (name === 'discovery-layout') return 'discovery.layout'
+  if (name.startsWith('terminal-layout-')) return `terminal.layout.${name.slice('terminal-layout-'.length)}`
+  if (name.startsWith('discovery-layout-')) return `discovery.layout.${name.slice('discovery-layout-'.length)}`
+  if (name.startsWith('vars-')) return `workspace-vars:${name.slice('vars-'.length)}`
+  if (name.endsWith('-layout')) return `workspace.${name.slice(0, -'-layout'.length)}.layout`
+  return null
+}
+
 /**
  * The live coordinator, for surfaces that need its status without a prop
  * chain (the Cloud Sync settings section). Null in standalone builds, where
@@ -373,6 +384,8 @@ export class SyncCoordinator {
     // the GET would pull the whole preferences blob down only for
     // applyRemoteEntries to discard every entry.
     if (this.canHydratePreferences()) await this.pullAndMerge()
+    await this.pullWorkspaces()
+    await this.pullChartState()
     await this.pullStructuredCollections()
     // Opt-in, so unlike the collections above this one only runs once the
     // user has actually said yes.
@@ -699,6 +712,19 @@ export class SyncCoordinator {
       return
     }
 
+    // KAY: stamp cross-device newest-wins metadata on the push-only domains.
+    const isWorkspacePush = endpoint.startsWith('/api/user/workspace/')
+    const isChartPush = endpoint === '/api/user/chart-state'
+    if (isWorkspacePush || isChartPush) {
+      const now = Date.now()
+      ;(body as Record<string, unknown>).updatedAt = now
+      try {
+        localStorage.setItem(`${TS_PREFIX}${key}`, String(now))
+      } catch {
+        // no storage -- the push still carries updatedAt
+      }
+    }
+
     try {
       this.setStatus('syncing')
       const res = await this.fetch(endpoint, {
@@ -729,6 +755,55 @@ export class SyncCoordinator {
       this.setStatus('synced')
     } catch {
       this.setStatus('error')
+    }
+  }
+
+  private async pullWorkspaces(): Promise<void> {
+    if (!this.enabledDomains.has('workspaces')) return
+    try {
+      const res = await this.fetch('/api/user/workspace', { method: 'GET' })
+      if (!res.ok) return
+      const data = (await res.json()) as { slots?: Array<{ name: string; panels: unknown; updatedAt: number }> }
+      for (const slot of data.slots ?? []) {
+        const key = slotNameToKey(slot.name)
+        if (!key) continue
+        const localTs = parseInt(localStorage.getItem(`${TS_PREFIX}${key}`) ?? '0', 10)
+        if (slot.updatedAt > localTs) {
+          try {
+            localStorage.setItem(`pairlens:${key}`, JSON.stringify(slot.panels))
+            localStorage.setItem(`${TS_PREFIX}${key}`, String(slot.updatedAt))
+          } catch {}
+          emitHydrate(key, slot.panels)
+        }
+      }
+    } catch {
+      // offline -- local workspace stays authoritative
+    }
+  }
+
+  private async pullChartState(): Promise<void> {
+    if (!this.enabledDomains.has('charts')) return
+    try {
+      const res = await this.fetch('/api/user/chart-state?pairKey=_all', { method: 'GET' })
+      if (!res.ok) return
+      const data = (await res.json()) as {
+        indicators?: Record<string, unknown>; drawings?: Record<string, unknown>; updatedAt: number
+      }
+      const localTs = parseInt(localStorage.getItem(`${TS_PREFIX}terminal.indicators`) ?? '0', 10)
+      if (data.updatedAt > localTs) {
+        for (const [key, value] of [
+          ['terminal.indicators', data.indicators ?? {}],
+          ['terminal.drawings', data.drawings ?? {}],
+        ] as const) {
+          try {
+            localStorage.setItem(`pairlens:${key}`, JSON.stringify(value))
+            localStorage.setItem(`${TS_PREFIX}${key}`, String(data.updatedAt))
+          } catch {}
+          emitHydrate(key, value)
+        }
+      }
+    } catch {
+      // offline
     }
   }
 
