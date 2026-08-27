@@ -2,6 +2,8 @@
 // SPDX-License-Identifier: FSL-1.1-Apache-2.0
 import { emailOTPClient } from 'better-auth/client/plugins'
 import { createAuthClient } from 'better-auth/react'
+import { useSyncExternalStore } from 'react'
+import { getAccessSession, __resetAccessSessionCache, type AccessSessionData } from './access-session'
 
 /** True when an App Server URL is explicitly configured. */
 export const hasAppServer = Boolean(import.meta.env.VITE_APP_SERVER_URL)
@@ -52,10 +54,6 @@ export const APP_SERVER_CREDENTIALS: RequestCredentials = 'same-origin'
 
 const AUTH_TOKEN_KEY = 'pairlens:auth-token'
 
-const getStoredAuthToken = (): string => {
-  if (typeof window === 'undefined') return ''
-  return window.localStorage.getItem(AUTH_TOKEN_KEY) ?? ''
-}
 
 export function clearStoredAuthToken(): void {
   if (typeof window === 'undefined') return
@@ -81,29 +79,48 @@ function createStubAuthClient() {
   >
 }
 
+const appServerUrl = (import.meta.env.VITE_APP_SERVER_URL ?? 'http://localhost:4046').replace(/\/+$/, '')
+
+function createAccessAuthClient() {
+  let snapshot: AccessSessionData = { data: null, error: null }
+  const listeners = new Set<() => void>()
+  let started = false
+
+  const refresh = async () => {
+    snapshot = await getAccessSession(appServerUrl)
+    listeners.forEach((l) => l())
+  }
+  const ensureStarted = () => {
+    if (started) return
+    started = true
+    void refresh()
+  }
+
+  return {
+    useSession: () => {
+      ensureStarted()
+      const data = useSyncExternalStore(
+        (cb) => { listeners.add(cb); return () => listeners.delete(cb) },
+        () => snapshot,
+        () => ({ data: null, error: null }) as AccessSessionData,
+      )
+      return { data: data.data, isPending: !started, error: data.error }
+    },
+    getSession: async () => {
+      const s = await getAccessSession(appServerUrl)
+      return { data: s.data, error: s.error }
+    },
+    signOut: async () => {
+      __resetAccessSessionCache()
+      clearStoredAuthToken()
+      if (typeof window !== 'undefined') window.location.href = '/cdn-cgi/access/logout'
+      return { data: null, error: null }
+    },
+    signIn: { emailOtp: () => Promise.resolve({ data: null, error: null }) },
+    emailOtp: { sendVerificationOtp: () => Promise.resolve({ data: null, error: null }) },
+  } as unknown as ReturnType<typeof createAuthClient<{ plugins: [ReturnType<typeof emailOTPClient>] }>>
+}
+
 export const authClient: ReturnType<
   typeof createAuthClient<{ plugins: [ReturnType<typeof emailOTPClient>] }>
-> = hasAppServer
-  ? createAuthClient({
-      baseURL: getAuthBaseURL(),
-      plugins: [emailOTPClient()],
-      fetchOptions: {
-        credentials: APP_SERVER_CREDENTIALS,
-        auth: {
-          type: 'Bearer',
-          token: getStoredAuthToken,
-        },
-        onSuccess: (ctx) => {
-          const token = ctx.response.headers.get('set-auth-token')
-          if (token) {
-            window.localStorage.setItem(AUTH_TOKEN_KEY, token)
-          }
-          // Signing out invalidates the session server-side — drop the dead
-          // token so we don't keep presenting it.
-          if (ctx.response.url.includes('/sign-out')) {
-            clearStoredAuthToken()
-          }
-        },
-      },
-    })
-  : createStubAuthClient()
+> = hasAppServer ? createAccessAuthClient() : createStubAuthClient()

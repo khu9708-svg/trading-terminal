@@ -866,9 +866,10 @@ export function PairlensProvider({
           const levelMap = new Map(
             entitlements.map((e) => [e.pluginId, e.accessLevel]),
           )
+          const wildcard = levelMap.get('*') ?? null
           manager.setAccessProvider({
             isAuthenticated: () => !!sessionRef.current,
-            getAccessLevel: (pluginId) => levelMap.get(pluginId) ?? null,
+            getAccessLevel: (pluginId) => wildcard ?? levelMap.get(pluginId) ?? null,
           })
           notifyPluginStateChange()
         })
