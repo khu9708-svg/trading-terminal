@@ -234,7 +234,7 @@ export const Route = createRootRouteWithContext<RouterContext>()({
         content: '#0a0806',
       },
       {
-        title: 'Pairlens Terminal',
+        title: 'KAY Terminal',
       },
     ],
     links: [
@@ -331,8 +331,8 @@ function RootDocument({ children }: { children: React.ReactNode }) {
     const push = () => {
       void import('@/lib/settings/close-behavior').then((m) =>
         m.setTrayLabels(
-          i18n.t('tray.show', { defaultValue: 'Show Pairlens' }),
-          i18n.t('tray.quit', { defaultValue: 'Quit Pairlens' }),
+          i18n.t('tray.show', { defaultValue: 'Show KAY' }),
+          i18n.t('tray.quit', { defaultValue: 'Quit KAY' }),
         ),
       )
     }
