@@ -3,9 +3,13 @@
 //
 // KAY owner sign-in. A branded launch screen for Cloudflare Access — there is
 // no password step here (Access owns authentication) and no Pairlens signup.
-// Every option is a full-page navigation to `/api/auth/login`, which a
-// dedicated Access application intercepts; `?idp=` deep-links a provider once
-// the owner has added Google / GitHub IdPs in Zero Trust.
+// Every option is a full-page navigation that a dedicated Access application
+// intercepts at the edge:
+//   • Google  → /api/auth/login/google  (single-IdP app, instant auth → Google)
+//   • GitHub  → /api/auth/login/github  (single-IdP app, instant auth → GitHub)
+//   • Email   → /api/auth/login         (the picker app — Cloudflare / GitHub /
+//              Google; `?idp=onetimepin` is a no-op until a One-Time PIN login
+//              method is enabled in Zero Trust)
 
 import { useState } from 'react'
 import { motion } from 'motion/react'
@@ -21,9 +25,16 @@ import { KayBrand } from '@/components/kay-logo'
 
 const LOGIN_URL = '/api/auth/login'
 
-function go(idp?: 'google' | 'github' | 'onetimepin'): void {
+const IDP_PATH = {
+  google: `${LOGIN_URL}/google`,
+  github: `${LOGIN_URL}/github`,
+  // Existing one-time PIN behaviour: the picker app, hinted at OTP.
+  onetimepin: `${LOGIN_URL}?idp=onetimepin`,
+} as const
+
+function go(idp: keyof typeof IDP_PATH): void {
   if (typeof window === 'undefined') return
-  window.location.href = idp ? `${LOGIN_URL}?idp=${idp}` : LOGIN_URL
+  window.location.href = IDP_PATH[idp]
 }
 
 function GoogleGlyph() {
