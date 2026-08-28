@@ -819,6 +819,18 @@ export function PairlensProvider({
     void coordinator.setSession(session?.user?.id ?? null)
   }, [session?.user?.id])
 
+  // KAY: mirror watchlists to the account so they follow the owner across
+  // devices (the LocalPersistenceAdapter keeps the local copy).
+  useEffect(() => {
+    const userId = session?.user?.id
+    if (!userId) return
+    let teardown: (() => void) | undefined
+    void import('@/lib/kay-watchlist-sync').then((m) => {
+      teardown = m.startKayWatchlistSync(userId)
+    })
+    return () => teardown?.()
+  }, [session?.user?.id])
+
   // Tie opt-in analytics to the signed-in identity (reset on sign-out).
   useEffect(() => {
     void import('@/lib/analytics').then((m) =>
@@ -869,7 +881,8 @@ export function PairlensProvider({
           const wildcard = levelMap.get('*') ?? null
           manager.setAccessProvider({
             isAuthenticated: () => !!sessionRef.current,
-            getAccessLevel: (pluginId) => wildcard ?? levelMap.get(pluginId) ?? null,
+            getAccessLevel: (pluginId) =>
+              wildcard ?? levelMap.get(pluginId) ?? null,
           })
           notifyPluginStateChange()
         })
