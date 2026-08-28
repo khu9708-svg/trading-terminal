@@ -81,11 +81,13 @@ describe('mobile separability', () => {
     expect(files.length).toBeGreaterThan(200)
   })
 
+  // Reads + regex-scans the whole terminal source tree; the default 5s bun
+  // timeout is tight on a cold FS cache.
   test('nothing outside src/mobile imports from src/mobile', () => {
     const offenders: Array<string> = []
 
     for (const file of files) {
-      const rel = relative(SRC, file)
+      const rel = relative(SRC, file).replaceAll('\\', '/')
       if (SANCTIONED_IMPORTERS.has(rel)) continue
       const source = readFileSync(file, 'utf8')
       MOBILE_IMPORT.lastIndex = 0
@@ -99,7 +101,7 @@ describe('mobile separability', () => {
     }
 
     expect(offenders).toEqual([])
-  })
+  }, 30_000)
 
   test('every sanctioned importer still exists and still imports mobile', () => {
     // A stale allowlist is a silent hole: an entry that no longer imports
