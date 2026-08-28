@@ -6,6 +6,7 @@ import type { ComponentType } from 'react'
 
 import type { ContributedStatusBarItem } from '@pairlens/plugin-system'
 import { usePairlens } from '@/lib/pairlens-provider'
+import { KayMark } from '@/components/kay-logo'
 import { getPaneIcon } from '@/lib/layout/pane-icons'
 import { localizedText } from '@/lib/plugin-text'
 
@@ -42,12 +43,16 @@ export function StatusBar() {
     // pluginStateVersion is the re-run trigger; pluginManager reads are non-reactive
   }, [pluginManager, pluginStateVersion])
 
-  // Don't render the bar if no plugins contribute status bar items
-  if (items.left.length === 0 && items.right.length === 0) return null
-
   return (
     <div className="flex h-6 shrink-0 items-center justify-between px-3 text-[10px] text-muted-foreground">
       <div className="flex items-center gap-3">
+        <span className="flex select-none items-center gap-1.5 tracking-[0.22em] text-[10px] font-medium text-foreground/70">
+          <KayMark
+            style={{ height: 12, width: 'auto', opacity: 0.9 }}
+            sweep={false}
+          />
+          KAY v1.0.0
+        </span>
         {items.left.map((r) => (
           <StatusBarItemView key={`${r.pluginId}:${r.item.id}`} resolved={r} />
         ))}

@@ -6,6 +6,7 @@ import { useNavigate } from '@tanstack/react-router'
 
 import type { ColorMode } from '@/lib/settings/color-mode'
 import { authClient, hasAppServer } from '@/lib/auth-client'
+import { IS_KAY_BUILD, startKaySignIn } from '@/lib/kay-auth'
 import { useOptimisticSession } from '@/lib/session'
 import {
   patchDesktopBridge,
@@ -39,7 +40,8 @@ export function DesktopMenuBridge() {
       },
       hasSession,
       hasAppServer,
-      signIn: () => void navigate({ to: '/sign-in' }),
+      signIn: () =>
+        IS_KAY_BUILD ? startKaySignIn() : void navigate({ to: '/sign-in' }),
       signOut: () => void authClient.signOut(),
     })
   }, [theme, setTheme, hasSession, navigate])

@@ -117,6 +117,8 @@ import { usePersistedState } from '@/hooks/use-persisted-state'
 import { useRecentPairs } from '@/lib/recent-tickers'
 import { chartLinkProps } from '@/lib/market-ref/link'
 import { authClient, hasAppServer } from '@/lib/auth-client'
+import { IS_KAY_BUILD } from '@/lib/kay-auth'
+import { SignInDialog } from '@/components/sign-in-dialog'
 import { api, clearSessionCache, queryKeys, resolveUrl } from '@/lib/api'
 import { PairlensProvider } from '@/lib/pairlens-provider'
 import { MarketDataProvider } from '@/lib/market-data-provider'
@@ -1059,13 +1061,25 @@ function TerminalUserMenu({
 
                     {hasAppServer && (
                       <>
-                        <DropdownMenuItem
-                          onClick={() => void navigate({ to: '/sign-in' })}
-                          className="group mt-0.5 cursor-pointer justify-center gap-2 rounded-lg bg-primary py-2 text-[13px] font-semibold text-primary-foreground shadow-sm transition-[background-color,transform] duration-150 hover:bg-primary/90 focus:bg-primary/90 focus:text-primary-foreground not-data-[variant=destructive]:focus:**:text-primary-foreground active:scale-[.99]"
-                        >
-                          <LogIn />
-                          {t('userMenu.signIn')}
-                        </DropdownMenuItem>
+                        {IS_KAY_BUILD ? (
+                          <SignInDialog>
+                            <button
+                              type="button"
+                              className="group mt-0.5 flex w-full cursor-pointer items-center justify-center gap-2 rounded-lg bg-primary py-2 text-[13px] font-semibold text-primary-foreground shadow-sm transition-[background-color,transform] duration-150 hover:bg-primary/90 active:scale-[.99]"
+                            >
+                              <LogIn />
+                              {t('userMenu.signIn')}
+                            </button>
+                          </SignInDialog>
+                        ) : (
+                          <DropdownMenuItem
+                            onClick={() => void navigate({ to: '/sign-in' })}
+                            className="group mt-0.5 cursor-pointer justify-center gap-2 rounded-lg bg-primary py-2 text-[13px] font-semibold text-primary-foreground shadow-sm transition-[background-color,transform] duration-150 hover:bg-primary/90 focus:bg-primary/90 focus:text-primary-foreground not-data-[variant=destructive]:focus:**:text-primary-foreground active:scale-[.99]"
+                          >
+                            <LogIn />
+                            {t('userMenu.signIn')}
+                          </DropdownMenuItem>
+                        )}
 
                         <div className="flex items-center justify-center gap-1.5 text-[11px] text-muted-foreground">
                           <ShieldCheck className="size-3 text-primary/70" />

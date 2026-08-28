@@ -86,7 +86,11 @@ describe('terminal build inputs', () => {
   it('declares every out-of-package file it reads', () => {
     const inputs = turboConfig.tasks?.build?.inputs ?? []
     for (const path of outOfPackage) {
-      const fromRoot = relative(REPO_ROOT, resolve(TERMINAL_DIR, path))
+      // turbo.json paths are POSIX; normalise for Windows checkouts.
+      const fromRoot = relative(
+        REPO_ROOT,
+        resolve(TERMINAL_DIR, path),
+      ).replaceAll('\\', '/')
       expect(inputs).toContain(`$TURBO_ROOT$/${fromRoot}`)
     }
   })

@@ -28,7 +28,17 @@ export type OnboardingSelections = {
   analytics?: 'enabled' | 'disabled'
 }
 
+/**
+ * The KAY build has no first-run wizard: kayjaytrades.com is a public terminal
+ * that any visitor sees immediately. Language auto-detects from `navigator`
+ * (see lib/i18n.ts), theme follows the OS, and there is no country/currency
+ * step. So onboarding is always "complete" and `_terminal`'s beforeLoad never
+ * bounces to `/onboarding`.
+ */
+const IS_KAY_BUILD = Boolean(import.meta.env.VITE_APP_SERVER_URL)
+
 export function isOnboardingComplete(): boolean {
+  if (IS_KAY_BUILD) return true
   try {
     return localStorage.getItem(ONBOARDING_KEY) === '1'
   } catch {

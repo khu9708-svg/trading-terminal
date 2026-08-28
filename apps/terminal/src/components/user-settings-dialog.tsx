@@ -709,7 +709,7 @@ function ProfileSignInPrompt() {
 
         {hasAppServer && (
           <div className="mt-6 flex justify-center">
-            <a href="/sign-in">
+            <a href="/api/auth/login">
               <Button>
                 <LogIn className="size-4" />
                 {t('settings.profile.signInButton')}

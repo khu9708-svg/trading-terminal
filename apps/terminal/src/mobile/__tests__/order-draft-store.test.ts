@@ -136,7 +136,7 @@ function sourceFiles(dir: string): Array<string> {
 
 describe('mobile order submission', () => {
   const files = sourceFiles(MOBILE_ROOT).map((path) => ({
-    path: path.slice(MOBILE_ROOT.length + 1),
+    path: path.slice(MOBILE_ROOT.length + 1).replaceAll('\\', '/'),
     source: stripComments(readFileSync(path, 'utf8')),
   }))
 

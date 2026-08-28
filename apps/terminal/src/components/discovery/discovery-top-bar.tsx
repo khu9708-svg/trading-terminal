@@ -60,13 +60,11 @@ export function DiscoveryTopBar({
 
           The heading keeps its text for screen readers: the mark is the page
           title visually, "Discovery" is the page title out loud. */}
-      <h1 aria-label={t('discovery.title')} className="shrink-0 leading-none">
-        <PairlensLogo
-          alt=""
-          width={3264}
-          height={630}
-          className="block h-[17px] w-auto select-none"
-        />
+      <h1
+        aria-label={t('discovery.title')}
+        className="shrink-0 leading-none pr-3 -my-1 select-none"
+      >
+        <PairlensLogo markHeight={34} className="block" />
       </h1>
       <div className={HEADER_GROUP}>
         <DiscoverySectionTabs
