@@ -1,6 +1,6 @@
 // Copyright (c) 2026 Juan Ignacio Molina Estrada
 // SPDX-License-Identifier: FSL-1.1-Apache-2.0
-import { describe, it, expect, beforeEach } from 'bun:test'
+import { beforeEach, describe, expect, it } from 'bun:test'
 import { SyncCoordinator } from '../sync-coordinator'
 import { onHydrate } from '../sync-channel'
 
@@ -75,7 +75,7 @@ describe('SyncCoordinator workspace/chart pull', () => {
   })
 
   it('pullWorkspaces skips a slot the local copy is newer than', async () => {
-    const hydrated: string[] = []
+    const hydrated: Array<string> = []
     const unsub = onHydrate((k) => hydrated.push(k))
     backing.set('pairlens:sync-ts:terminal.layout', '9999')
 

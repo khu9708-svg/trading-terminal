@@ -5,11 +5,11 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from 'sonner'
 
-import {
-  jinxApi,
-  type JinxCommandKind,
-  type JinxCommandResult,
-  type JinxStatusResponse,
+import { jinxApi } from './client'
+import type {
+  JinxCommandKind,
+  JinxCommandResult,
+  JinxStatusResponse,
 } from './client'
 
 export const jinxKeys = {

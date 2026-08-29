@@ -32,7 +32,7 @@ import {
 import { Input } from '@pairlens/ui/components/ui/input'
 import { Label } from '@pairlens/ui/components/ui/label'
 
-import { jinxApi, LAMPORTS_PER_SOL, formatSol } from '@/lib/jinx/client'
+import { LAMPORTS_PER_SOL, formatSol, jinxApi } from '@/lib/jinx/client'
 import { useJinxCommand, useJinxStatus } from '@/lib/jinx/use-jinx'
 
 export function JinxWallet() {

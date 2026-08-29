@@ -1,13 +1,10 @@
 // Copyright (c) 2026 Juan Ignacio Molina Estrada
 // SPDX-License-Identifier: FSL-1.1-Apache-2.0
-import { emailOTPClient } from 'better-auth/client/plugins'
-import { createAuthClient } from 'better-auth/react'
 import { useSyncExternalStore } from 'react'
-import {
-  getAccessSession,
-  __resetAccessSessionCache,
-  type AccessSessionData,
-} from './access-session'
+import { __resetAccessSessionCache, getAccessSession } from './access-session'
+import type { emailOTPClient } from 'better-auth/client/plugins'
+import type { createAuthClient } from 'better-auth/react'
+import type { AccessSessionData } from './access-session'
 
 /** True when an App Server URL is explicitly configured. */
 export const hasAppServer = Boolean(import.meta.env.VITE_APP_SERVER_URL)
