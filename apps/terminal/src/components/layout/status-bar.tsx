@@ -7,6 +7,7 @@ import type { ComponentType } from 'react'
 import type { ContributedStatusBarItem } from '@pairlens/plugin-system'
 import { usePairlens } from '@/lib/pairlens-provider'
 import { KayMark } from '@/components/kay-logo'
+import { JinxStatusStrip } from '@/components/jinx/jinx-status-strip'
 import { getPaneIcon } from '@/lib/layout/pane-icons'
 import { localizedText } from '@/lib/plugin-text'
 
@@ -61,6 +62,7 @@ export function StatusBar() {
         {items.right.map((r) => (
           <StatusBarItemView key={`${r.pluginId}:${r.item.id}`} resolved={r} />
         ))}
+        <JinxStatusStrip className="text-[10px]" />
       </div>
     </div>
   )

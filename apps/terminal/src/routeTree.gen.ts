@@ -19,6 +19,7 @@ import { Route as TerminalWorkspaceStoreRouteImport } from './routes/_terminal/w
 import { Route as TerminalWorkflowsRouteImport } from './routes/_terminal/workflows'
 import { Route as TerminalPluginsRouteImport } from './routes/_terminal/plugins'
 import { Route as TerminalNotificationsRouteImport } from './routes/_terminal/notifications'
+import { Route as TerminalJinxRouteImport } from './routes/_terminal/jinx'
 import { Route as TerminalIndicatorsRouteImport } from './routes/_terminal/indicators'
 import { Route as TerminalBotsRouteImport } from './routes/_terminal/bots'
 import { Route as TerminalAccountsRouteImport } from './routes/_terminal/accounts'
@@ -75,6 +76,11 @@ const TerminalNotificationsRoute = TerminalNotificationsRouteImport.update({
   path: '/notifications',
   getParentRoute: () => TerminalRoute,
 } as any)
+const TerminalJinxRoute = TerminalJinxRouteImport.update({
+  id: '/jinx',
+  path: '/jinx',
+  getParentRoute: () => TerminalRoute,
+} as any)
 const TerminalIndicatorsRoute = TerminalIndicatorsRouteImport.update({
   id: '/indicators',
   path: '/indicators',
@@ -115,6 +121,7 @@ export interface FileRoutesByFullPath {
   '/accounts': typeof TerminalAccountsRoute
   '/bots': typeof TerminalBotsRoute
   '/indicators': typeof TerminalIndicatorsRoute
+  '/jinx': typeof TerminalJinxRoute
   '/notifications': typeof TerminalNotificationsRoute
   '/plugins': typeof TerminalPluginsRoute
   '/workflows': typeof TerminalWorkflowsRoute
@@ -131,6 +138,7 @@ export interface FileRoutesByTo {
   '/accounts': typeof TerminalAccountsRoute
   '/bots': typeof TerminalBotsRoute
   '/indicators': typeof TerminalIndicatorsRoute
+  '/jinx': typeof TerminalJinxRoute
   '/notifications': typeof TerminalNotificationsRoute
   '/plugins': typeof TerminalPluginsRoute
   '/workflows': typeof TerminalWorkflowsRoute
@@ -150,6 +158,7 @@ export interface FileRoutesById {
   '/_terminal/accounts': typeof TerminalAccountsRoute
   '/_terminal/bots': typeof TerminalBotsRoute
   '/_terminal/indicators': typeof TerminalIndicatorsRoute
+  '/_terminal/jinx': typeof TerminalJinxRoute
   '/_terminal/notifications': typeof TerminalNotificationsRoute
   '/_terminal/plugins': typeof TerminalPluginsRoute
   '/_terminal/workflows': typeof TerminalWorkflowsRoute
@@ -170,6 +179,7 @@ export interface FileRouteTypes {
     | '/accounts'
     | '/bots'
     | '/indicators'
+    | '/jinx'
     | '/notifications'
     | '/plugins'
     | '/workflows'
@@ -186,6 +196,7 @@ export interface FileRouteTypes {
     | '/accounts'
     | '/bots'
     | '/indicators'
+    | '/jinx'
     | '/notifications'
     | '/plugins'
     | '/workflows'
@@ -204,6 +215,7 @@ export interface FileRouteTypes {
     | '/_terminal/accounts'
     | '/_terminal/bots'
     | '/_terminal/indicators'
+    | '/_terminal/jinx'
     | '/_terminal/notifications'
     | '/_terminal/plugins'
     | '/_terminal/workflows'
@@ -295,6 +307,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof TerminalNotificationsRouteImport
       parentRoute: typeof TerminalRoute
     }
+    '/_terminal/jinx': {
+      id: '/_terminal/jinx'
+      path: '/jinx'
+      fullPath: '/jinx'
+      preLoaderRoute: typeof TerminalJinxRouteImport
+      parentRoute: typeof TerminalRoute
+    }
     '/_terminal/indicators': {
       id: '/_terminal/indicators'
       path: '/indicators'
@@ -344,6 +363,7 @@ interface TerminalRouteChildren {
   TerminalAccountsRoute: typeof TerminalAccountsRoute
   TerminalBotsRoute: typeof TerminalBotsRoute
   TerminalIndicatorsRoute: typeof TerminalIndicatorsRoute
+  TerminalJinxRoute: typeof TerminalJinxRoute
   TerminalNotificationsRoute: typeof TerminalNotificationsRoute
   TerminalPluginsRoute: typeof TerminalPluginsRoute
   TerminalWorkflowsRoute: typeof TerminalWorkflowsRoute
@@ -358,6 +378,7 @@ const TerminalRouteChildren: TerminalRouteChildren = {
   TerminalAccountsRoute: TerminalAccountsRoute,
   TerminalBotsRoute: TerminalBotsRoute,
   TerminalIndicatorsRoute: TerminalIndicatorsRoute,
+  TerminalJinxRoute: TerminalJinxRoute,
   TerminalNotificationsRoute: TerminalNotificationsRoute,
   TerminalPluginsRoute: TerminalPluginsRoute,
   TerminalWorkflowsRoute: TerminalWorkflowsRoute,

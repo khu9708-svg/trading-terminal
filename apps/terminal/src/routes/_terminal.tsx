@@ -14,6 +14,7 @@ import {
   Bot,
   Bug,
   Clock,
+  Crosshair,
   EllipsisVertical,
   House,
   LayoutTemplate,
@@ -275,13 +276,15 @@ function TerminalLayout() {
             ? 'indicators'
             : location.pathname.startsWith('/bots')
               ? 'bots'
-              : isChartPath(location.pathname)
-                ? 'charts'
-                : location.pathname.startsWith('/workspace-store')
-                  ? 'workspace-store'
-                  : location.pathname.startsWith('/workspace/')
-                    ? 'workspaces'
-                    : 'pairs'
+              : location.pathname.startsWith('/jinx')
+                ? 'jinx'
+                : isChartPath(location.pathname)
+                  ? 'charts'
+                  : location.pathname.startsWith('/workspace-store')
+                    ? 'workspace-store'
+                    : location.pathname.startsWith('/workspace/')
+                      ? 'workspaces'
+                      : 'pairs'
 
   // Auto-open workspace tree when on a workspace route
   useEffect(() => {
@@ -478,7 +481,10 @@ function TerminalLayout() {
                       defaultOpen
                     >
                       <TauriDragRegion sectionLabel={sectionLabel} />
-                      <SectionTour key={activeItem} sectionId={activeItem} />
+                      <SectionTour
+                        key={activeItem}
+                        sectionId={activeItem === 'jinx' ? 'pairs' : activeItem}
+                      />
                       <Sidebar
                         side="left"
                         variant="inset"
@@ -612,6 +618,20 @@ function TerminalLayout() {
                                     <ShortcutHint
                                       keys={shortcutLabel('navigation.bots')}
                                     />
+                                  </SidebarMenuButton>
+                                </SidebarMenuItem>
+                                <SidebarMenuItem className={railSection()}>
+                                  <SidebarMenuButton
+                                    aria-label="JINX"
+                                    className={RAIL_ITEM}
+                                    isActive={activeItem === 'jinx'}
+                                    onClick={() =>
+                                      void navigate({ to: '/jinx' })
+                                    }
+                                    type="button"
+                                  >
+                                    <Crosshair size={16} />
+                                    <span className="sr-only">JINX</span>
                                   </SidebarMenuButton>
                                 </SidebarMenuItem>
                                 <SidebarSeparator className={RAIL_SEPARATOR} />
