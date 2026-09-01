@@ -20,8 +20,7 @@ export function JinxTelemetry() {
           <CardTitle className="text-sm">Canonical telemetry</CardTitle>
         </CardHeader>
         <CardContent className="text-sm text-muted-foreground">
-          DISCONNECTED — the local producer has not reported canonical
-          telemetry.
+          DISCONNECTED: the local producer has not reported canonical telemetry.
         </CardContent>
       </Card>
     )

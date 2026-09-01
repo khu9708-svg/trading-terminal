@@ -53,7 +53,11 @@ export interface JinxCanonicalTelemetry {
   }
   mcp: {
     status: string
-    servers: Array<{ name: string; status: string; tools: string[] | string }>
+    servers: Array<{
+      name: string
+      status: string
+      tools: Array<string> | string
+    }>
   }
   agents: Array<{ name: string; status: string; task: string }>
   browser: { status: string; target: string; detail: string }
