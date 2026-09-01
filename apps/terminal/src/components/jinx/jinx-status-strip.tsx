@@ -17,8 +17,9 @@ export function JinxStatusStrip({ className }: { className?: string }) {
   const { data } = useJinxStatus({ intervalMs: 5000 })
   const conn = jinxConnectionLabel(data)
   const snap = data?.snapshot
+  const control = snap?.control
   const live = conn === 'LIVE'
-  const pnl = snap?.pnl.realizedSol ?? 0
+  const pnl = control?.pnl?.realized_sol ?? 0
 
   return (
     <Link
@@ -50,19 +51,23 @@ export function JinxStatusStrip({ className }: { className?: string }) {
         JINX {conn}
       </span>
       <Sep />
-      <span className={cn(snap?.mode === 'AUTO' ? 'text-amber-500' : '')}>
-        {snap?.mode ?? 'MANUAL'}
+      <span
+        className={cn(
+          control?.execution_mode === 'AUTO' ? 'text-amber-500' : '',
+        )}
+      >
+        {control?.execution_mode ?? 'UNKNOWN'}
       </span>
       <Sep />
-      <span>{formatSol(snap?.wallet.sol, 3)}</span>
+      <span>{formatSol(control?.wallet?.sol, 3)}</span>
       <Sep />
       <span className="flex items-center gap-1">
-        {snap?.alerts ? (
+        {control?.alerts ? (
           <Bell className="size-3" />
         ) : (
           <BellOff className="size-3 opacity-60" />
         )}
-        {snap?.alerts ? 'on' : 'off'}
+        {control?.alerts ? 'on' : 'off'}
       </span>
       <Sep />
       <span

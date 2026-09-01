@@ -13,37 +13,95 @@
 
 import { appServerUrl, authFetch } from '@/lib/api'
 
-export type JinxDesiredState = 'PARKED' | 'RUNNING'
-export type JinxMode = 'MANUAL' | 'AUTO'
+export const KAYJAY_TELEMETRY_CONTRACT_VERSION = 'kayjay.telemetry.v1'
 
-export interface JinxSnapshot {
-  agent: 'JINX'
-  on: boolean
-  running: boolean
-  desiredState: JinxDesiredState
-  mode: JinxMode
-  liveTrading: boolean
-  alerts: boolean
-  enginePid: number | null
-  feed: {
-    connected: boolean
-    stale: boolean
-    lagMs: number | null
-    opportunities: number
-    edges: number
-    lastError: string | null
+/**
+ * The exact persisted payload from the owner-authenticated Worker. These names
+ * intentionally mirror ATLAS engine/face/jinx.py and engine/face/mcp.py.
+ */
+export interface JinxCanonicalTelemetry {
+  contract_version: typeof KAYJAY_TELEMETRY_CONTRACT_VERSION
+  as_of: string
+  source_status: string
+  lifecycle: { state: string; phase: string; detail: string }
+  discovery: {
+    status: string
+    candidates: Array<{ identifier: string; state: string; detail: string }>
   }
-  wallet: {
-    address: string | null
-    lamports: number | null
-    sol: number | null
+  token_market: {
+    symbol: string
+    status: string
+    price: number | null
+    change_pct: number | null
+    liquidity_usd: number | null
+    volume_24h_usd: number | null
   }
-  pnl: { realizedLamports: string; realizedSol: number; openPositions: number }
-  updatedAt: string
+  safety: { status: string; score: number | null; reason: string }
+  position: {
+    status: string
+    token: string
+    quantity: number | null
+    entry_price: number | null
+    current_price: number | null
+    pnl_usd: number | null
+  }
+  execution: {
+    state: string
+    order_id: string
+    venue: string
+    detail: string
+  }
+  mcp: {
+    status: string
+    servers: Array<{ name: string; status: string; tools: string[] | string }>
+  }
+  agents: Array<{ name: string; status: string; task: string }>
+  browser: { status: string; target: string; detail: string }
+  github: {
+    repository: string
+    pr: string
+    pr_state: string
+    ci_state: string
+    detail: string
+  }
+  interceptor: { state: string; detail: string; run_id: string }
+  commands: Array<Record<string, unknown>>
+  events: Array<Record<string, unknown>>
+  control: {
+    running?: boolean
+    desired_state?: string
+    execution_mode?: string
+    live_trading?: boolean
+    alerts?: boolean
+    engine_pid?: number | null
+    feed?: {
+      connected: boolean
+      stale: boolean
+      lag_ms: number | null
+      opportunities: number
+      edges: number
+      last_error: string | null
+    }
+    wallet?: {
+      address: string | null
+      lamports: number | null
+      sol: number | null
+    }
+    pnl?: {
+      realized_lamports: string
+      realized_sol: number
+      open_positions: number
+      closed_trades: number
+      win_rate: number | null
+      fees_lamports: string
+      jito_tip_lamports: string
+    }
+  }
 }
 
 export interface JinxStatusResponse {
-  snapshot: JinxSnapshot | null
+  contract_version: typeof KAYJAY_TELEMETRY_CONTRACT_VERSION
+  snapshot: JinxCanonicalTelemetry | null
   reportedAt: number | null
   ageMs: number | null
   /** true when the local worker hasn't reported in >20s — show DISCONNECTED. */
@@ -144,14 +202,22 @@ export const jinxApi = {
 // ---- display helpers -------------------------------------------------------
 
 export function jinxOnline(status: JinxStatusResponse | undefined): boolean {
-  return !!status && !status.stale && !!status.snapshot?.on
+  return (
+    !!status &&
+    !status.stale &&
+    status.snapshot?.source_status === 'LIVE' &&
+    status.snapshot.control.running === true
+  )
 }
 
 export function jinxConnectionLabel(
   status: JinxStatusResponse | undefined,
-): 'LIVE' | 'OFF' | 'DISCONNECTED' {
+): string {
   if (!status || status.stale || !status.snapshot) return 'DISCONNECTED'
-  return status.snapshot.on ? 'LIVE' : 'OFF'
+  if (status.snapshot.source_status !== 'LIVE') {
+    return status.snapshot.source_status
+  }
+  return status.snapshot.control.running === true ? 'LIVE' : 'OFF'
 }
 
 export function formatSol(sol: number | null | undefined, dp = 4): string {

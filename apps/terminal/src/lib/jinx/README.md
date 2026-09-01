@@ -15,20 +15,29 @@ browser (this terminal)
 
 The Cloudflare edge cannot reach `127.0.0.1:8794`, so control is an **outbound
 queue**: the browser enqueues a command, the local worker polls it, runs it, and
-posts the result back. Status is a snapshot the worker pushes every ~5s; when it
-goes quiet the console shows `DISCONNECTED`.
+posts the result back. Status is a `kayjay.telemetry.v1` snapshot the worker pushes every ~5s; when it
+goes quiet the Worker overlays its `source_status` as `DISCONNECTED`.
+
+The console renders the returned payload directly. Its root fields match the
+ATLAS face adapters: `as_of`, `source_status`, JINX `lifecycle`, `discovery`,
+`token_market`, `safety`, `position`, `execution`, `events`, plus MCP observer
+`mcp`, `agents`, `browser`, `github`, `interceptor`, and `commands`. The
+canonical sentinel values `UNKNOWN`, `DISCONNECTED`, `STALE`, and
+`BLOCKED_EXTERNAL` remain visible rather than being synthesized into client
+state.
 
 ## Files
 
-| File                                          | What                                                                             |
-| --------------------------------------------- | -------------------------------------------------------------------------------- |
-| `client.ts`                                   | typed API client + display helpers. Uses `authFetch` from `@/lib/api`.           |
-| `use-jinx.ts`                                 | `useJinxStatus()` (polls `/api/jinx/status`), `useJinxCommand()` (send + await). |
-| `../../components/jinx/jinx-control-bar.tsx`  | START/STOP, MANUAL/AUTO, Alerts, Feed, Wallet, P&L.                              |
-| `../../components/jinx/jinx-status-strip.tsx` | compact `LIVE/OFF · MODE · SOL · Alerts · P&L` for the status bar.               |
-| `../../components/jinx/jinx-wallet.tsx`       | Deposit (address + QR) / Withdraw (review → confirm → signature).                |
-| `../../components/jinx/jinx-console-page.tsx` | composes the above.                                                              |
-| `../../routes/_terminal/jinx.tsx`             | the `/jinx` route.                                                               |
+| File                                          | What                                                                                  |
+| --------------------------------------------- | ------------------------------------------------------------------------------------- |
+| `client.ts`                                   | typed canonical contract client + display helpers. Uses `authFetch` from `@/lib/api`. |
+| `use-jinx.ts`                                 | `useJinxStatus()` (polls `/api/jinx/status`), `useJinxCommand()` (send + await).      |
+| `../../components/jinx/jinx-control-bar.tsx`  | START/STOP, MANUAL/AUTO, Alerts, Feed, Wallet, P&L.                                   |
+| `../../components/jinx/jinx-status-strip.tsx` | compact `LIVE/OFF · MODE · SOL · Alerts · P&L` for the status bar.                    |
+| `../../components/jinx/jinx-wallet.tsx`       | Deposit (address + QR) / Withdraw (review → confirm → signature).                     |
+| `../../components/jinx/jinx-telemetry.tsx`    | Direct JINX/MCP canonical telemetry view; no browser runtime projection.              |
+| `../../components/jinx/jinx-console-page.tsx` | composes the above.                                                                   |
+| `../../routes/_terminal/jinx.tsx`             | the `/jinx` route.                                                                    |
 
 ## Remaining wiring (3 small edits — kept out of this commit so they land verified)
 

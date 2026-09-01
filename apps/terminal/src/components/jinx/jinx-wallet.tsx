@@ -37,9 +37,9 @@ import { useJinxCommand, useJinxStatus } from '@/lib/jinx/use-jinx'
 
 export function JinxWallet() {
   const { data } = useJinxStatus({ intervalMs: 6000 })
-  const snap = data?.snapshot
-  const address = snap?.wallet.address ?? null
-  const balanceSol = snap?.wallet.sol ?? null
+  const control = data?.snapshot?.control
+  const address = control?.wallet?.address ?? null
+  const balanceSol = control?.wallet?.sol ?? null
 
   return (
     <div className="grid gap-4 lg:grid-cols-2">

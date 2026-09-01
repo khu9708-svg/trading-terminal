@@ -10,12 +10,14 @@
  * local worker → JINX engine. No terminal, no PowerShell.
  */
 import { JinxControlBar } from './jinx-control-bar'
+import { JinxTelemetry } from './jinx-telemetry'
 import { JinxWallet } from './jinx-wallet'
 
 export function JinxConsolePage() {
   return (
     <div className="mx-auto w-full max-w-4xl space-y-6 p-4 sm:p-6">
       <JinxControlBar />
+      <JinxTelemetry />
       <section className="space-y-3">
         <h2 className="text-sm font-semibold text-muted-foreground">Wallet</h2>
         <JinxWallet />

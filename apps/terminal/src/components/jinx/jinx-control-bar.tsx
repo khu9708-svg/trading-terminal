@@ -47,7 +47,8 @@ export function JinxControlBar() {
 
   const conn = jinxConnectionLabel(data)
   const snap = data?.snapshot
-  const disconnected = conn === 'DISCONNECTED'
+  const control = snap?.control
+  const disconnected = conn !== 'LIVE' && conn !== 'OFF'
   const on = conn === 'LIVE'
   const busy = cmd.isPending
 
@@ -72,7 +73,7 @@ export function JinxControlBar() {
           >
             {conn}
           </Badge>
-          {snap?.liveTrading && (
+          {control?.live_trading && (
             <Badge variant="destructive" className="gap-1">
               <AlertTriangle className="size-3" /> LIVE MONEY
             </Badge>
@@ -127,13 +128,13 @@ export function JinxControlBar() {
             <span
               className={cn(
                 'text-sm',
-                snap?.mode !== 'AUTO' && 'font-semibold',
+                control?.execution_mode !== 'AUTO' && 'font-semibold',
               )}
             >
               MANUAL
             </span>
             <Switch
-              checked={snap?.mode === 'AUTO'}
+              checked={control?.execution_mode === 'AUTO'}
               disabled={busy || disconnected}
               onCheckedChange={(next) => {
                 if (next) setConfirmAuto(true)
@@ -143,7 +144,8 @@ export function JinxControlBar() {
             <span
               className={cn(
                 'text-sm',
-                snap?.mode === 'AUTO' && 'font-semibold text-amber-500',
+                control?.execution_mode === 'AUTO' &&
+                  'font-semibold text-amber-500',
               )}
             >
               AUTO
@@ -154,7 +156,7 @@ export function JinxControlBar() {
         <Field label="Alerts">
           <div className="flex items-center gap-3">
             <Switch
-              checked={!!snap?.alerts}
+              checked={!!control?.alerts}
               disabled={busy || disconnected}
               onCheckedChange={(next) =>
                 run(
@@ -164,7 +166,7 @@ export function JinxControlBar() {
                 )
               }
             />
-            <span className="text-sm">{snap?.alerts ? 'ON' : 'OFF'}</span>
+            <span className="text-sm">{control?.alerts ? 'ON' : 'OFF'}</span>
           </div>
         </Field>
       </div>
@@ -176,32 +178,34 @@ export function JinxControlBar() {
         <Stat
           label="Feed"
           value={
-            snap?.feed.connected && !snap.feed.stale
+            control?.feed?.connected && !control.feed.stale
               ? 'CONNECTED'
               : 'DISCONNECTED'
           }
           icon={
-            snap?.feed.connected && !snap.feed.stale ? (
+            control?.feed?.connected && !control.feed.stale ? (
               <Wifi className="size-4" />
             ) : (
               <WifiOff className="size-4" />
             )
           }
-          tone={snap?.feed.connected && !snap.feed.stale ? 'good' : 'muted'}
+          tone={
+            control?.feed?.connected && !control.feed.stale ? 'good' : 'muted'
+          }
         />
         <Stat
           label="Opportunities"
-          value={String(snap?.feed.opportunities ?? '—')}
+          value={String(control?.feed?.opportunities ?? '—')}
           icon={<Activity className="size-4" />}
         />
-        <Stat label="Wallet" value={formatSol(snap?.wallet.sol, 4)} />
+        <Stat label="Wallet" value={formatSol(control?.wallet?.sol, 4)} />
         <Stat
           label="Realized P&L"
-          value={`${(snap?.pnl.realizedSol ?? 0) >= 0 ? '+' : ''}${(snap?.pnl.realizedSol ?? 0).toFixed(4)} SOL`}
+          value={`${(control?.pnl?.realized_sol ?? 0) >= 0 ? '+' : ''}${(control?.pnl?.realized_sol ?? 0).toFixed(4)} SOL`}
           tone={
-            (snap?.pnl.realizedSol ?? 0) > 0
+            (control?.pnl?.realized_sol ?? 0) > 0
               ? 'good'
-              : (snap?.pnl.realizedSol ?? 0) < 0
+              : (control?.pnl?.realized_sol ?? 0) < 0
                 ? 'bad'
                 : 'muted'
           }
