@@ -1,5 +1,17 @@
 # CLAUDE.md
 
+## P0 OWNER CONTROL — READ FIRST
+
+Before any work, read `AI_BUILD_CONTRACT.md`.
+
+**Do not create any new directory or subdirectory unless Kevin explicitly approves that exact directory first.** Do not create a new repository, worktree, branch, rewrite, or parallel implementation without explicit owner approval.
+
+Before building, search this repo, its branches/PRs, and sibling KAYJAY repositories for the capability. Prefer wiring or improving existing work over creating another implementation.
+
+A task is not complete at "built" or "tests pass." It must be canonical, runtime-wired where applicable, verified, committed, pushed, and merged to `main`, or its exact outstanding SHA/path and reason must be recorded before session end.
+
+---
+
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 ## What is Pairlens
@@ -20,7 +32,7 @@ bun run dev                    # Terminal (App Server: local :4046 if running, e
 bun run dev:terminal           # Terminal only
 bun run dev:marketing          # Marketing only
 bun run dev:registry           # Plugin registry only
-bun run dev:desktop            # Tauri desktop app (requires Rust toolchain)
+bun run dev:desktop            # Tauri 2 desktop app (requires Rust toolchain)
 bun run build                  # Build all workspaces
 bun run build:terminal         # Build terminal only
 bun run build:marketing        # Build marketing only
