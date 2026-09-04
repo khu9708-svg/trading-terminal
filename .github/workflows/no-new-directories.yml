@@ -1,0 +1,50 @@
+name: Owner Directory Guard
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+jobs:
+  no-new-directories:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Reject unapproved new directories
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          BASE_SHA: ${{ github.event.pull_request.base.sha || github.event.before }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
+          OWNER_APPROVED: ${{ contains(github.event.pull_request.labels.*.name, 'owner-approved-directory') }}
+        run: |
+          set -euo pipefail
+          if [[ "$EVENT_NAME" == "pull_request" && "$OWNER_APPROVED" == "true" ]]; then
+            echo "Owner approval label present; directory creation allowed for this PR."
+            exit 0
+          fi
+          if [[ -z "${BASE_SHA:-}" || "$BASE_SHA" =~ ^0+$ ]]; then exit 0; fi
+          git fetch --no-tags origin "$BASE_SHA" >/dev/null 2>&1 || true
+          mapfile -t added_files < <(git diff --diff-filter=A --name-only "$BASE_SHA" "$HEAD_SHA")
+          violations=()
+          for file in "${added_files[@]}"; do
+            dir="$(dirname "$file")"
+            [[ "$dir" == "." ]] && continue
+            current="$dir"
+            while [[ "$current" != "." && -n "$current" ]]; do
+              if ! git cat-file -e "$BASE_SHA:$current" 2>/dev/null; then
+                violations+=("$current  <-  $file")
+              fi
+              [[ "$current" != */* ]] && break
+              current="$(dirname "$current")"
+            done
+          done
+          if (( ${#violations[@]} > 0 )); then
+            echo "ERROR: unapproved new directory detected. Kevin must explicitly approve it and apply PR label owner-approved-directory."
+            printf '%s\n' "${violations[@]}" | sort -u
+            exit 1
+          fi
+          echo "Directory guard passed."
